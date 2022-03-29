@@ -43,14 +43,34 @@ def kinect_rgbd_callback(rgb_data, depth_data):
         plt.imshow(cv_depth)
         plt.show()
 
+
+
+
         img = cv_rgb_arr.copy()
         depth_raw = cv_depth_arr.copy()
 
         gray = img.astype(np.uint8)
-        #depth = (float(depth_raw)-0.500)/(2.500-00)*255;
+        depth_raw = depth_raw
+
+        print(depth_raw.shape)
+        print("Min , max :",np.min(depth_raw) , np.max(depth_raw) )
+        
+        for i in range(depth_raw.shape[0]):
+            for j in range(depth_raw.shape[1]):
+                if(depth_raw[i,j] > 2500):
+                    depth_raw[i,j]  = 2500
+        
+        print("Min , max :",np.min(depth_raw) , np.max(depth_raw) )
+
+        
+        depth = (depth_raw)#.astype(np.uint8)
+        depth = (depth_raw-500)/(2500-00)*255
         depth = (depth_raw).astype(np.uint8)
 
-        print("Min , max :",np.min(depth_raw) , np.max(depth_raw) )
+
+
+
+        print("Min , max :",np.min(depth) , np.max(depth) )
         rgd_image = gray
         rgd_image[:,:,2] = depth
 
@@ -59,11 +79,30 @@ def kinect_rgbd_callback(rgb_data, depth_data):
             cv2.imshow("RGB", cv_rgb)
             cv2.waitKey(0)
 
-        plt.subplot(1, 2, 1)
+        plt.subplot(2, 2, 1)
         plt.imshow(rgd_image)
-        plt.subplot(1, 2, 2)
-        plt.imshow(cv_rgb)
+        plt.subplot(2, 2, 2)
+        plt.imshow(cv_depth)
+
+        x, y, w, h = 500, 0, 800, 700  #(X,W) = (500,700) FOR SQUARE
+        crop_rgd = rgd_image[y:y+h, x:x+w]
+        crop_depth = cv_depth[y:y+h, x:x+w]
+
+        plt.subplot(2, 2, 3)
+        plt.imshow(crop_rgd)
+        plt.subplot(2, 2, 4)
+        plt.imshow(crop_depth)
         plt.show()
+        #cv2.imwrite('RGD_image.png',crop_rgd)  #changes the color format
+
+        # saves RG-D image 
+        im_rgd = PILImage.fromarray(crop_rgd, 'RGB')
+        im_rgd.save("img_rgd_pakad","PNG")
+
+        # saves the captured RGB-IMAGE
+        im_rgd = PILImage.fromarray(cv_rgb, 'RGB')
+        im_rgd.save("cv_rgb","PNG")
+
 
     except CvBridgeError as e:
         print(e)
